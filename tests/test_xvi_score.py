@@ -25,7 +25,7 @@ def settle(v1, v2=None, verified=True, ts=2_000_000):
 _n = [0]
 
 
-def fill(wallet, action, token, shares, price, *, role="taker", contract="NEGRISK_CTF_EXCHANGE", counterparty="0xCP", block=100, log=None, ts=1_000_000, fee=0, v2=False):
+def fill(wallet, action, token, shares, price, *, role="taker", contract="NEGRISK_CTF_EXCHANGE", counterparty="0xCP", block=100, log=None, ts=1_000_000, fee=0, v2=False, order_hash=None):
     """Build one OrderFilled row in the orderfilled_selected.parquet layout."""
     _n[0] += 1
     log = _n[0] if log is None else log
@@ -37,11 +37,14 @@ def fill(wallet, action, token, shares, price, *, role="taker", contract="NEGRIS
     else:
         ma, ta = ("0", token) if action == "BUY" else (token, "0")
         mam, tam = (u, q) if action == "BUY" else (q, u)
-    return {"timestamp": ts, "block_number": block, "log_index": log, "contract": contract, "maker": wallet,
+    row = {"timestamp": ts, "block_number": block, "log_index": log, "contract": contract, "maker": wallet,
             "taker": EX if role == "taker" else counterparty, "maker_asset_id": ma, "taker_asset_id": ta,
             "maker_amount_filled": mam, "taker_amount_filled": tam, "maker_fee": int(fee * 1e6), "taker_fee": 0, "protocol_fee": 0,
             "event_role": "taker_order" if role == "taker" else "maker_order", "asset_id": token, "market_id": "M",
             "nonusdc_side": "token1" if token == T1 else "token2", "in_trades_parquet": role == "maker"}
+    if order_hash is not None:
+        row["order_hash"] = order_hash
+    return row
 
 
 def run(rows, settlement):
@@ -122,6 +125,22 @@ def test_duplicates_removed_but_multiple_fills_in_one_transaction_kept():
     assert rep["duplicate_rows_removed"] == 1 and rep["decisions"] == 3
     assert (d[d.actor_wallet.eq("A")].decision_id.tolist() == ["7-5", "7-6"])
     assert aggregate_actors(d).set_index("actor_wallet").loc["A", "n_decisions"] == 2
+
+
+def test_repeated_maker_fills_retain_shared_order_hash_without_collapsing():
+    order_hash = "0xSAME_ORDER"
+    rows = [fill("A", "BUY", T1, 4, 0.5, role="maker", block=7, log=5, order_hash=order_hash),
+            fill("A", "BUY", T1, 6, 0.5, role="maker", block=8, log=6, order_hash=order_hash)]
+    d, rep = run(rows, settle(1.0))
+    assert len(d) == 2 and d.decision_id.tolist() == ["7-5", "8-6"]
+    assert d.order_hash.tolist() == [order_hash, order_hash]
+    assert rep["order_hash_available"] and rep["distinct_order_hashes"] == 1
+
+
+def test_legacy_extract_without_order_hash_gets_null_column():
+    d, rep = run([fill("A", "BUY", T1, 1, 0.5)], settle(1.0))
+    assert "order_hash" in d.columns and d.order_hash.isna().all()
+    assert not rep["order_hash_available"] and rep["rows_without_order_hash"] == 1
 
 
 def test_unknown_payout_and_unknown_semantics_are_not_scored_as_zero():

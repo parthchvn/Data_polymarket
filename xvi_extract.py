@@ -487,7 +487,7 @@ def main():
 # fills: raw OrderFilled events (maker AND taker orders) for the selected markets
 # --------------------------------------------------------------------------- #
 ORDERFILLED_FILE = "orderfilled.parquet"
-FILL_COLS = ["timestamp", "block_number", "log_index", "contract", "maker", "taker", "maker_asset_id",
+FILL_COLS = ["timestamp", "block_number", "log_index", "contract", "order_hash", "maker", "taker", "maker_asset_id",
              "taker_asset_id", "maker_amount_filled", "taker_amount_filled", "maker_fee", "taker_fee", "protocol_fee"]
 KNOWN_EXCHANGES = {  # Polygon addresses that appear as `taker` on an order's own OrderFilled event
     "0x4bfb41d5b3570defd03c39a9a4d8de6bd8b8982e": "CTF_EXCHANGE",
@@ -510,8 +510,9 @@ def cmd_fills(args):
     maker's, which is wrong for MINT/MERGE matches. The taker order's own event (taker = exchange
     contract) carries the taker's real side, token, amounts and fee. orderfilled.parquet is partitioned by
     month with unsorted row groups inside each month, so every row group of each active month is read,
-    with column projection (order_hash and transaction_hash are skipped; (block_number, log_index) is the
-    join key to trades.parquet).
+    with column projection. ``order_hash`` is retained so later analysis can recognise partial executions
+    of the same order; transaction_hash is skipped because (block_number, log_index) is the join key to
+    trades.parquet.
     """
     import datetime as dt
     sel, index_dir = Path(args.selected), Path(args.index)
@@ -548,7 +549,10 @@ def cmd_fills(args):
         ym2 = f"{dt.datetime.fromtimestamp(st.max, dt.timezone.utc):%Y-%m}"
         if ym != ym2: sys.exit(f"row group {i} spans months {ym}..{ym2}; month partition assumption broken")
         by_month.setdefault(ym, []).append(i)
-    todo = [ym for ym in months if not (cache / f"{ym}.parquet").exists()]
+    # A cache produced by an older version can be read by scoring, but it must be refreshed here so a new
+    # extraction does not silently omit the newly retained order_hash column.
+    todo = [ym for ym in months if not (cache / f"{ym}.parquet").exists()
+            or "order_hash" not in pq.read_schema(cache / f"{ym}.parquet").names]
     est = sum(md.row_group(i).column(j).total_compressed_size for ym in todo for i in by_month.get(ym, []) for j in need)
     print(f"months {months}; {len(todo)} to fetch, ~{est/1e9:.2f} GB projected over {sum(len(by_month.get(ym, [])) for ym in todo)} row groups")
     token_arr = pa.array(list(tokens))
@@ -608,6 +612,7 @@ def cmd_fills(args):
         "trades_parquet_rows_total": trades.num_rows,
         "exchange_addresses_detected": sorted(exchange_addrs), "exchange_addresses_unrecognised": sorted(unknown_ex),
         "amount_encoding": "uint256 little-endian, decoded to int64 micro-units (1e6 = 1 USDC or 1 share)",
+        "order_hash_caveat": "order_hash identifies repeated executions of the same submitted order, but OrderFilled data contains no unfilled or cancelled orders and a maker order's first observed fill is only an upper bound on its placement time",
         "completed_at": utc_now(), "sha256_orderfilled_selected_parquet": sha256_file(sel / "orderfilled_selected.parquet"),
     }
     (sel / "fills_manifest.json").write_text(json.dumps(rep, indent=2))

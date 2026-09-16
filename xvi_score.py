@@ -45,7 +45,7 @@ DECISION_COLS = [
     "decision_id", "source_execution_id", "market_id", "condition_id", "timestamp", "datetime_utc", "actor_id", "actor_wallet", "actor_role",
     "actor_seq", "actor_market_seq", "actor_n_decisions", "prev_decision_timestamp",
     "counterparty_wallet", "action", "outcome_token", "outcome_label", "asset_id", "shares", "execution_price", "cash_amount_usd",
-    "fee_amount", "fee_asset", "transaction_hash", "block_number", "log_index", "contract", "order_group_id", "source_revision",
+    "fee_amount", "fee_asset", "transaction_hash", "order_hash", "block_number", "log_index", "contract", "order_group_id", "source_revision",
     "action_semantics", "action_verified", "fill_group_consistent", "in_trades_parquet",
     "settlement_payout", "settlement_verified", "settlement_source", "settlement_timestamp", "payout_verified_at", "label_available_at",
     "decision_payoff_usd", "decision_payoff_after_fee_usd", "score_status", "score_note", "label_public_at_decision",
@@ -57,6 +57,10 @@ DECISION_COLS = [
 # --------------------------------------------------------------------------- #
 def normalize_fills(fills: pd.DataFrame, markets: list[dict], trades: pd.DataFrame | None, source_revision: str) -> tuple[pd.DataFrame, dict]:
     """One decision per OrderFilled event, attributed to the order's owner (the event's `maker` field).
+
+    ``order_hash`` is carried through when the extract provides it. Older extracts do not have the column,
+    so their decisions receive a null value. Repeated fills that share an order hash remain separate
+    execution decisions; this function never collapses them into one row.
 
     Exchange semantics used:
       V1 contracts (CTF_EXCHANGE, NEGRISK_CTF_EXCHANGE): exactly one leg is collateral (asset id "0").
@@ -120,6 +124,7 @@ def normalize_fills(fills: pd.DataFrame, markets: list[dict], trades: pd.DataFra
     d["decision_id"] = d["block_number"].astype(str) + "-" + d["log_index"].astype(str)
     d["source_execution_id"] = "orderfilled:" + d["decision_id"]
     d["source_revision"] = source_revision
+    d["order_hash"] = f["order_hash"] if "order_hash" in f.columns else None
     # taker order group: a taker order's fills share (block, taker wallet); the taker's own event is the decision
     d["order_group_id"] = np.where(d["actor_role"].eq("taker"),
                                    d["block_number"].astype(str) + ":" + d["actor_wallet"],
@@ -150,7 +155,10 @@ def normalize_fills(fills: pd.DataFrame, markets: list[dict], trades: pd.DataFra
               "action_unverified": int((~d["action_verified"]).sum()),
               "fill_groups": int(len(cmp)), "fill_groups_consistent": int(len(consistent_groups)),
               "fill_groups_missing_taker_event": groups_no_taker, "fill_groups_missing_maker_events": groups_no_maker, "fill_groups_share_mismatch": groups_mismatch,
-              "taker_rows_without_transaction_hash": int((d["actor_role"].eq("taker") & d["transaction_hash"].isna()).sum())}
+              "taker_rows_without_transaction_hash": int((d["actor_role"].eq("taker") & d["transaction_hash"].isna()).sum()),
+              "order_hash_available": "order_hash" in f.columns,
+              "rows_without_order_hash": int(d["order_hash"].isna().sum()),
+              "distinct_order_hashes": int(d["order_hash"].nunique(dropna=True))}
     return d, report
 
 
@@ -349,6 +357,7 @@ def cmd_run(args):
             "v1": "OrderFilled(maker, taker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled): the collateral leg is asset id 0; the event owner is `maker`; the order's own event has taker == exchange contract. Cross-check: for every (block, taker wallet) group the maker fills' share total equals the taker event's shares (see fill_groups_*).",
             "v2": "CTF_EXCHANGE_V2 events carry a side flag (0 BUY / 1 SELL) in the first id field and the token id in the second. Established from the Polygon receipt of tx 0xa6b35cae4c8d23096c4290cfb46711b6a7acc8b26e7e3d6211c0bd1d4d4e9580 (block 88019603): ERC-1155 transfers of 7.98 YES and 7.98 NO into the exchange, collateral of 4.08985+0.05975 fee and 3.8304 paid out, i.e. a MERGE of two SELL orders whose events have the flag 1.",
             "trades_parquet_caveat": "Wang's trades.parquet keeps only maker-order events, mirrors the maker side onto the taker (wrong for MINT/MERGE fills), rounds amounts to 2 dp, and for CTF_EXCHANGE_V2 drops every SELL order (side flag 1). All of that is bypassed by scoring from orderfilled events.",
+            "order_hash_caveat": "order_hash is retained when present and can link partial executions of the same order. Rows are not collapsed: OrderFilled data omits unfilled and cancelled orders, and a maker order's first observed fill is only an upper bound on its placement time. Legacy extracts without order_hash remain supported with null values.",
         },
         "normalization": norm_rep, "validation_against_trades_parquet": val,
         "fee_treatment": "decision_payoff_usd is before fees. fee_amount is the collateral fee charged to the order owner (V2 events only; V1 fees are zero here). Verified on chain: V2 BUY at block 87994720 log 501 paid 10.06 for shares booked as 10.00 (fee 0.06 on top); V2 SELL in tx 0xa6b35cae... received 4.08985 of 4.1496 booked (fee 0.05975 deducted). decision_payoff_after_fee_usd = decision_payoff_usd - fee_amount.",

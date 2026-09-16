@@ -3,6 +3,7 @@ data/selected/trades.parquet
 data/selected/cache_orderfilled/
 data/scored/*.parquet
 data/scored/*.jsonl.gz
+data/human_filter/
 data/news/raw/
 data/news/*.parquet
 __pycache__/
