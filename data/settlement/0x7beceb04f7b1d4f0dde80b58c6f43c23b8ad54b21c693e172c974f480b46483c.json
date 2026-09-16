@@ -1,0 +1,41 @@
+{
+  "market_id": "507300",
+  "condition_id": "0x7beceb04f7b1d4f0dde80b58c6f43c23b8ad54b21c693e172c974f480b46483c",
+  "question": "Will Inter Milan win the UEFA Champions League?",
+  "settlement_source": "Polygon ConditionalTokens 0x4D97DCd97eC945f40cF65F87097ACe5EA0476045 via https://polygon.drpc.org",
+  "payout_verified_at": "2026-09-15T19:39:39.239381+00:00",
+  "settlement_verified": true,
+  "token_mapping": {
+    "token1_outcome_index": 0,
+    "token2_outcome_index": 1,
+    "collateral": "WrappedCollateral(neg-risk)",
+    "verified": true
+  },
+  "outcome_slot_count": 2,
+  "payout_denominator": 1,
+  "payout_numerators": [
+    0,
+    1
+  ],
+  "payout_per_share": [
+    0.0,
+    1.0
+  ],
+  "resolution_block_by_bisection": 72211250,
+  "resolution_block": 72211250,
+  "resolution_tx": "0x2ca9df423ffb8c8ec3bb2c4bed0ad189f05321fa6e3f3a42f83ed64d253083be",
+  "oracle": "0xd91e80cf2e7be2e162c6513ced06f1dd0da35296",
+  "event_payout_numerators": [
+    0,
+    1
+  ],
+  "settlement_timestamp": 1748736352,
+  "settlement_time_utc": "2025-06-01T00:05:52+00:00",
+  "event_matches_state": true,
+  "status": "resolved",
+  "gamma_outcome_prices_string": "['0', '1']",
+  "end_date_metadata": "2025-05-31 12:00:00+00:00",
+  "payout_token1": 0.0,
+  "payout_token2": 1.0,
+  "rpc_calls": 42
+}

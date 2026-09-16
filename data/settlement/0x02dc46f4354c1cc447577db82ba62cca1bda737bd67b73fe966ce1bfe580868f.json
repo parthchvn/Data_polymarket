@@ -1,0 +1,41 @@
+{
+  "market_id": "542539",
+  "condition_id": "0x02dc46f4354c1cc447577db82ba62cca1bda737bd67b73fe966ce1bfe580868f",
+  "question": "No change in Fed interest rates after September 2025 meeting?",
+  "settlement_source": "Polygon ConditionalTokens 0x4D97DCd97eC945f40cF65F87097ACe5EA0476045 via https://polygon.drpc.org",
+  "payout_verified_at": "2026-09-15T19:39:43.785240+00:00",
+  "settlement_verified": true,
+  "token_mapping": {
+    "token1_outcome_index": 0,
+    "token2_outcome_index": 1,
+    "collateral": "WrappedCollateral(neg-risk)",
+    "verified": true
+  },
+  "outcome_slot_count": 2,
+  "payout_denominator": 1,
+  "payout_numerators": [
+    0,
+    1
+  ],
+  "payout_per_share": [
+    0.0,
+    1.0
+  ],
+  "resolution_block_by_bisection": 76574816,
+  "resolution_block": 76574816,
+  "resolution_tx": "0x6851167fe26f4d654290d010aff295d27515a9be3c51125f32fce62ab0981863",
+  "oracle": "0xd91e80cf2e7be2e162c6513ced06f1dd0da35296",
+  "event_payout_numerators": [
+    0,
+    1
+  ],
+  "settlement_timestamp": 1758144462,
+  "settlement_time_utc": "2025-09-17T21:27:42+00:00",
+  "event_matches_state": true,
+  "status": "resolved",
+  "gamma_outcome_prices_string": "['0', '1']",
+  "end_date_metadata": "2025-09-17 12:00:00+00:00",
+  "payout_token1": 0.0,
+  "payout_token2": 1.0,
+  "rpc_calls": 84
+}

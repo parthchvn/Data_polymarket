@@ -1,0 +1,35 @@
+{
+  "started_at": "2026-09-16T14:05:03.920919+00:00",
+  "sources": [
+    "rss"
+  ],
+  "window_days": 7,
+  "markets": {
+    "507300": {
+      "question": "Will Inter Milan win the UEFA Champions League?",
+      "queries": [
+        "Inter Milan Champions League",
+        "Inter PSG Champions League final"
+      ],
+      "from": "2024-09-14",
+      "to": "2025-06-02",
+      "requests": 76,
+      "saturated_windows": 11,
+      "errors": 0,
+      "rows": 2573
+    },
+    "570360": {
+      "question": "Fed decreases interest rates by 50+ bps after December 2025 meeting?",
+      "queries": [
+        "Fed December meeting rate cut",
+        "FOMC December decision"
+      ],
+      "from": "2025-07-29",
+      "to": "2025-12-11",
+      "requests": 40,
+      "saturated_windows": 5,
+      "errors": 0,
+      "rows": 1104
+    }
+  }
+}

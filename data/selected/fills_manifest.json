@@ -1,0 +1,61 @@
+{
+  "dataset": "SII-WANGZJ/Polymarket_data",
+  "revision": "6d3c336c39cf1a2dfe53d702ad2c110ab5bdbfde",
+  "file": "orderfilled.parquet",
+  "source": "https://huggingface.co/datasets/SII-WANGZJ/Polymarket_data/resolve/6d3c336c39cf1a2dfe53d702ad2c110ab5bdbfde/orderfilled.parquet",
+  "source_lfs_sha256": "96033112f6f6dcd710b06b6032c63f1d1cd6b6aeb8aa6af8f2fbafccc4911ae1",
+  "months_scanned": [
+    "2024-09",
+    "2024-10",
+    "2024-11",
+    "2024-12",
+    "2025-01",
+    "2025-02",
+    "2025-03",
+    "2025-04",
+    "2025-05",
+    "2025-06",
+    "2025-07",
+    "2025-08",
+    "2025-09",
+    "2025-10",
+    "2025-11",
+    "2025-12",
+    "2026-06",
+    "2026-07"
+  ],
+  "columns": [
+    "timestamp",
+    "block_number",
+    "log_index",
+    "contract",
+    "maker",
+    "taker",
+    "maker_asset_id",
+    "taker_asset_id",
+    "maker_amount_filled",
+    "taker_amount_filled",
+    "maker_fee",
+    "taker_fee",
+    "protocol_fee"
+  ],
+  "bytes_fetched_this_run": 14552923952,
+  "range_requests_this_run": 1770,
+  "seconds": 232.0,
+  "rows": 535790,
+  "maker_order_rows": 304424,
+  "taker_order_rows": 231366,
+  "maker_rows_present_in_trades_parquet": 287188,
+  "trades_parquet_rows_found_in_orderfilled": 287188,
+  "trades_parquet_rows_total": 287188,
+  "exchange_addresses_detected": [
+    "0xC5d563A36AE78145C45a50134d48A1215220f80a",
+    "0xE111180000d2663C0091e4f400237545B87B996B"
+  ],
+  "exchange_addresses_unrecognised": [
+    "0xE111180000d2663C0091e4f400237545B87B996B"
+  ],
+  "amount_encoding": "uint256 little-endian, decoded to int64 micro-units (1e6 = 1 USDC or 1 share)",
+  "completed_at": "2026-09-15T19:35:15.474182+00:00",
+  "sha256_orderfilled_selected_parquet": "ca3be2cef5d8cd14a98281f26fc5abaae233f827c1bed649f106173cc891c4a5"
+}

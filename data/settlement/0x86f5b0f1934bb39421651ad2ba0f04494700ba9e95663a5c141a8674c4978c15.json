@@ -1,0 +1,41 @@
+{
+  "market_id": "2446852",
+  "condition_id": "0x86f5b0f1934bb39421651ad2ba0f04494700ba9e95663a5c141a8674c4978c15",
+  "question": "Will Ronaldo Cry at the World Cup?",
+  "settlement_source": "Polygon ConditionalTokens 0x4D97DCd97eC945f40cF65F87097ACe5EA0476045 via https://polygon.drpc.org",
+  "payout_verified_at": "2026-09-15T19:39:52.409716+00:00",
+  "settlement_verified": true,
+  "token_mapping": {
+    "token1_outcome_index": 0,
+    "token2_outcome_index": 1,
+    "collateral": "USDC.e",
+    "verified": true
+  },
+  "outcome_slot_count": 2,
+  "payout_denominator": 1,
+  "payout_numerators": [
+    1,
+    0
+  ],
+  "payout_per_share": [
+    1.0,
+    0.0
+  ],
+  "resolution_block_by_bisection": 89959584,
+  "resolution_block": 89959584,
+  "resolution_tx": "0x258fb94eac46e0bc85220350b426d80cf9e62dd5a4de295981d77a3355a5347f",
+  "oracle": "0x65070be91477460d8a7aeeb94ef92fe056c2f2a7",
+  "event_payout_numerators": [
+    1,
+    0
+  ],
+  "settlement_timestamp": 1783644371,
+  "settlement_time_utc": "2026-07-10T00:46:11+00:00",
+  "event_matches_state": true,
+  "status": "resolved",
+  "gamma_outcome_prices_string": "['0.9995', '0.0005']",
+  "end_date_metadata": "2026-07-10 00:10:04+00:00",
+  "payout_token1": 1.0,
+  "payout_token2": 0.0,
+  "rpc_calls": 164
+}

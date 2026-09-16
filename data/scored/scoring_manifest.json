@@ -1,0 +1,211 @@
+{
+  "generated_at": "2026-09-15T19:52:55.609885+00:00",
+  "inputs": {
+    "dataset": "SII-WANGZJ/Polymarket_data",
+    "revision": "6d3c336c39cf1a2dfe53d702ad2c110ab5bdbfde",
+    "trades_parquet_sha256": "f6a88115277a700fe4be1166b5c51df41d805b68cb7a2aa6a9f95145749b03c0",
+    "orderfilled_selected_sha256": "ca3be2cef5d8cd14a98281f26fc5abaae233f827c1bed649f106173cc891c4a5",
+    "orderfilled_source_lfs_sha256": "96033112f6f6dcd710b06b6032c63f1d1cd6b6aeb8aa6af8f2fbafccc4911ae1",
+    "exchange_addresses_treated_as_exchange": [
+      "0xC5d563A36AE78145C45a50134d48A1215220f80a",
+      "0xE111180000d2663C0091e4f400237545B87B996B"
+    ]
+  },
+  "semantics_evidence": {
+    "v1": "OrderFilled(maker, taker, makerAssetId, takerAssetId, makerAmountFilled, takerAmountFilled): the collateral leg is asset id 0; the event owner is `maker`; the order's own event has taker == exchange contract. Cross-check: for every (block, taker wallet) group the maker fills' share total equals the taker event's shares (see fill_groups_*).",
+    "v2": "CTF_EXCHANGE_V2 events carry a side flag (0 BUY / 1 SELL) in the first id field and the token id in the second. Established from the Polygon receipt of tx 0xa6b35cae4c8d23096c4290cfb46711b6a7acc8b26e7e3d6211c0bd1d4d4e9580 (block 88019603): ERC-1155 transfers of 7.98 YES and 7.98 NO into the exchange, collateral of 4.08985+0.05975 fee and 3.8304 paid out, i.e. a MERGE of two SELL orders whose events have the flag 1.",
+    "trades_parquet_caveat": "Wang's trades.parquet keeps only maker-order events, mirrors the maker side onto the taker (wrong for MINT/MERGE fills), rounds amounts to 2 dp, and for CTF_EXCHANGE_V2 drops every SELL order (side flag 1). All of that is bypassed by scoring from orderfilled events."
+  },
+  "normalization": {
+    "raw_rows": 535790,
+    "duplicate_rows_removed": 0,
+    "decisions": 535790,
+    "maker_decisions": 304424,
+    "taker_decisions": 231366,
+    "action_unverified": 0,
+    "fill_groups": 225411,
+    "fill_groups_consistent": 225407,
+    "fill_groups_missing_taker_event": 0,
+    "fill_groups_missing_maker_events": 3,
+    "fill_groups_share_mismatch": 1,
+    "taker_rows_without_transaction_hash": 10529
+  },
+  "validation_against_trades_parquet": {
+    "maker_decisions_matched_to_trades_parquet": 287188,
+    "maker_decisions_absent_from_trades_parquet": 17236,
+    "direction_agrees": 287188,
+    "token_agrees": 287188,
+    "max_abs_usd_diff": 0.005000000004656613,
+    "max_abs_shares_diff": 0.005000000001018634,
+    "rows_usd_diff_over_1c": 0,
+    "rows_shares_diff_over_1c": 0,
+    "trades_parquet_price_times_shares_vs_usd_max_diff": 0.009920000000001039
+  },
+  "fee_treatment": "decision_payoff_usd is before fees. fee_amount is the collateral fee charged to the order owner (V2 events only; V1 fees are zero here). Verified on chain: V2 BUY at block 87994720 log 501 paid 10.06 for shares booked as 10.00 (fee 0.06 on top); V2 SELL in tx 0xa6b35cae... received 4.08985 of 4.1496 booked (fee 0.05975 deducted). decision_payoff_after_fee_usd = decision_payoff_usd - fee_amount.",
+  "per_market": {
+    "507300": {
+      "decisions": 158466,
+      "scored": 158466,
+      "unscored_by_reason": {},
+      "sum_decision_payoff_usd": 709.594665,
+      "sum_actor_summary_usd": 709.594665,
+      "actors": 17213,
+      "market_wide_payoff_sum_usd": 709.59,
+      "maker_rows_absent_from_trades_parquet": 0,
+      "decisions_executed_at_or_after_settlement": 0,
+      "fill_groups_with_missing_counterparty_rows": 5,
+      "settlement": {
+        "status": "resolved",
+        "payout_per_share": [
+          0.0,
+          1.0
+        ],
+        "payout_token1": 0.0,
+        "payout_token2": 1.0,
+        "settlement_time_utc": "2025-06-01T00:05:52+00:00",
+        "resolution_block": 72211250,
+        "resolution_tx": "0x2ca9df423ffb8c8ec3bb2c4bed0ad189f05321fa6e3f3a42f83ed64d253083be",
+        "oracle": "0xd91e80cf2e7be2e162c6513ced06f1dd0da35296",
+        "gamma_outcome_prices_string": "['0', '1']",
+        "end_date_metadata": "2025-05-31 12:00:00+00:00"
+      },
+      "sums_consistent": true
+    },
+    "542539": {
+      "decisions": 93575,
+      "scored": 93575,
+      "unscored_by_reason": {},
+      "sum_decision_payoff_usd": -0.00137,
+      "sum_actor_summary_usd": -0.00137,
+      "actors": 10534,
+      "market_wide_payoff_sum_usd": -0.0,
+      "maker_rows_absent_from_trades_parquet": 0,
+      "decisions_executed_at_or_after_settlement": 0,
+      "fill_groups_with_missing_counterparty_rows": 0,
+      "settlement": {
+        "status": "resolved",
+        "payout_per_share": [
+          0.0,
+          1.0
+        ],
+        "payout_token1": 0.0,
+        "payout_token2": 1.0,
+        "settlement_time_utc": "2025-09-17T21:27:42+00:00",
+        "resolution_block": 76574816,
+        "resolution_tx": "0x6851167fe26f4d654290d010aff295d27515a9be3c51125f32fce62ab0981863",
+        "oracle": "0xd91e80cf2e7be2e162c6513ced06f1dd0da35296",
+        "gamma_outcome_prices_string": "['0', '1']",
+        "end_date_metadata": "2025-09-17 12:00:00+00:00"
+      },
+      "sums_consistent": true
+    },
+    "570360": {
+      "decisions": 198413,
+      "scored": 198413,
+      "unscored_by_reason": {},
+      "sum_decision_payoff_usd": -0.003909,
+      "sum_actor_summary_usd": -0.003909,
+      "actors": 26269,
+      "market_wide_payoff_sum_usd": -0.0,
+      "maker_rows_absent_from_trades_parquet": 0,
+      "decisions_executed_at_or_after_settlement": 0,
+      "fill_groups_with_missing_counterparty_rows": 0,
+      "settlement": {
+        "status": "resolved",
+        "payout_per_share": [
+          0.0,
+          1.0
+        ],
+        "payout_token1": 0.0,
+        "payout_token2": 1.0,
+        "settlement_time_utc": "2025-12-10T22:17:52+00:00",
+        "resolution_block": 80149940,
+        "resolution_tx": "0xf553bf6fe8d777d161627b1c18fc63426b715828fd530889b8183f91c4d5e663",
+        "oracle": "0xd91e80cf2e7be2e162c6513ced06f1dd0da35296",
+        "gamma_outcome_prices_string": "['0', '1']",
+        "end_date_metadata": "2025-12-10 00:00:00+00:00"
+      },
+      "sums_consistent": true
+    },
+    "2446852": {
+      "decisions": 85336,
+      "scored": 85336,
+      "unscored_by_reason": {},
+      "sum_decision_payoff_usd": -1.4e-05,
+      "sum_actor_summary_usd": -1.4e-05,
+      "actors": 8829,
+      "market_wide_payoff_sum_usd": -0.0,
+      "maker_rows_absent_from_trades_parquet": 17236,
+      "decisions_executed_at_or_after_settlement": 2,
+      "fill_groups_with_missing_counterparty_rows": 0,
+      "settlement": {
+        "status": "resolved",
+        "payout_per_share": [
+          1.0,
+          0.0
+        ],
+        "payout_token1": 1.0,
+        "payout_token2": 0.0,
+        "settlement_time_utc": "2026-07-10T00:46:11+00:00",
+        "resolution_block": 89959584,
+        "resolution_tx": "0x258fb94eac46e0bc85220350b426d80cf9e62dd5a4de295981d77a3355a5347f",
+        "oracle": "0x65070be91477460d8a7aeeb94ef92fe056c2f2a7",
+        "gamma_outcome_prices_string": "['0.9995', '0.0005']",
+        "end_date_metadata": "2026-07-10 00:10:04+00:00"
+      },
+      "sums_consistent": true
+    }
+  },
+  "totals": {
+    "decisions": 535790,
+    "scored": 535790,
+    "actors": 60974
+  },
+  "outputs": {
+    "market_decisions.parquet": "dd5293b9b4e316846017614a1eb1e6c8f01d654ae0abe81d558c89c17fb39d77",
+    "actor_summary.parquet": "569b7c2d9b78451de384cfd1e1c999146cd1235e4b907bc7d6a9c3240ee06554",
+    "actor_summary_all_markets.parquet": "acc9492ce340ba21605992c62d1096dd5e775d6214c56f051dd804bf35962e68",
+    "market_decisions.jsonl.gz": "b06c19c583ef748712d625f015d302e2fe878e92eb5c2c95f0ca7c120b58afcc"
+  },
+  "columns_market_decisions": [
+    "decision_id",
+    "source_execution_id",
+    "market_id",
+    "condition_id",
+    "timestamp",
+    "datetime_utc",
+    "actor_wallet",
+    "actor_role",
+    "counterparty_wallet",
+    "action",
+    "outcome_token",
+    "outcome_label",
+    "asset_id",
+    "shares",
+    "execution_price",
+    "cash_amount_usd",
+    "fee_amount",
+    "fee_asset",
+    "transaction_hash",
+    "block_number",
+    "log_index",
+    "contract",
+    "order_group_id",
+    "source_revision",
+    "action_semantics",
+    "action_verified",
+    "fill_group_consistent",
+    "in_trades_parquet",
+    "settlement_payout",
+    "settlement_verified",
+    "settlement_source",
+    "settlement_timestamp",
+    "payout_verified_at",
+    "label_available_at",
+    "decision_payoff_usd",
+    "decision_payoff_after_fee_usd",
+    "score_status",
+    "score_note",
+    "label_public_at_decision"
+  ]
+}
